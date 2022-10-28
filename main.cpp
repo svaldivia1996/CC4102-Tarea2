@@ -119,7 +119,7 @@ int main()
             int w1 = rand() % 100; //peso ida 
             int w2 = rand() % 100; //peso vuelta
             graph[inic].push_back({dest, w1});
-            graph[dest].push_back({inic, w1});
+            graph[dest].push_back({inic, w2});
         }
         auto inicio = chrono::steady_clock::now();
         DijskstraSlow(nodos, graph, 0);
