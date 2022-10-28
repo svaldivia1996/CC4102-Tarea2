@@ -56,22 +56,64 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
 
 }
 
+vector<pair<int, int>> generateGraph(int nodos){ //no me salio :c
+    vector<pair<int, int>> graph[nodos + 1];
+    for (int i = 0; i < nodos; i++){
+        int dest = rand() % nodos; //nodo destino
+        int w = rand() % 100; //peso 
+        graph[i].push_back({dest, w});
+        graph[dest].push_back({i, w});
+    }
+    return *graph;
+}
+
 int main()
 {
-    int n = 5; //cant de nodos
-    vector<pair<int, int>> graph[n + 1]; //inic del lista de adj
-    graph[0].push_back({1, 2});// el nodo 0 tiene se dirige al nodo 1 con un peso 2
-    graph[0].push_back({3, 1});
-    graph[1].push_back({0, 2});
-    graph[1].push_back({4, 5});
-    graph[1].push_back({2, 4});
-    graph[2].push_back({1, 4});
-    graph[2].push_back({3, 3});
-    graph[2].push_back({4, 1});
-    graph[3].push_back({0, 1});
-    graph[3].push_back({2, 3});
-    graph[4].push_back({1, 5});
-    graph[4].push_back({2, 1});
-    DijskstraSlow(n, graph, 0);
+    
+    
+
+    cout << "Ingrese la cantidad de test seguido de la cantidad de nodos probar " << endl;
+    int n, nodos;
+    cin >> n >> nodos;
+
+    //Ejemplos individuales
+    int ntest1 = 5; //cant de nodos
+    vector<pair<int, int>> graphTest1[ntest1 + 1]; //inic del lista de adj
+    graphTest1[0].push_back({1, 2});// el nodo 0 tiene se dirige al nodo 1 con un peso 2
+    graphTest1[0].push_back({3, 1});
+    graphTest1[1].push_back({0, 2});
+    graphTest1[1].push_back({4, 5});
+    graphTest1[1].push_back({2, 4});
+    graphTest1[2].push_back({1, 4});
+    graphTest1[2].push_back({3, 3});
+    graphTest1[2].push_back({4, 1});
+    graphTest1[3].push_back({0, 1});
+    graphTest1[3].push_back({2, 3});
+    graphTest1[4].push_back({1, 5});
+    graphTest1[4].push_back({2, 1});
+
+    auto inicio = chrono::steady_clock::now();
+    DijskstraSlow(ntest1, graphTest1, 0);
+    auto fin = chrono::steady_clock::now();
+    double duracion = chrono::duration_cast<chrono::microseconds>(fin-inicio).count();
+    cout <<"Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
+
+    
+    while(n--){
+        vector<pair<int, int>> graph[nodos + 1];
+        for (int i = 0; i < nodos; i++){
+            int dest = rand() % nodos; //nodo destino
+            int w = rand() % 100; //peso 
+            graph[i].push_back({dest, w});
+            graph[dest].push_back({i, w});
+        }
+        auto inicio = chrono::steady_clock::now();
+        DijskstraSlow(nodos, graph, 0);
+        auto fin = chrono::steady_clock::now();
+        double duracion = chrono::duration_cast<chrono::microseconds>(fin-inicio).count();
+        cout <<"Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
+    }
+
+
     return 0;
 }
