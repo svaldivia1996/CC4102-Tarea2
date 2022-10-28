@@ -32,13 +32,14 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
         int minIndex = minDistance(dist, visited);
 
         visited[minIndex] = true;
-        node = minIndex;
+        //node = minIndex;
+        int nodeaux=minIndex;
 
         int v;
         int w; 
         // cout << "Node " << node << " makes an edge with \n";
         //para la recursion del sobre la lista https://www.geeksforgeeks.org/graph-implementation-using-stl-for-competitive-programming-set-2-weighted-graph/
-        for (auto it = graph[node].begin(); it != graph[node].end(); it++)
+        for (auto it = graph[nodeaux].begin(); it != graph[nodeaux].end(); it++)
         {
             v = it->first;
             w = it->second;
@@ -101,11 +102,24 @@ int main()
     
     while(n--){
         vector<pair<int, int>> graph[nodos + 1];
+        vector<int> aux(nodos);
         for (int i = 0; i < nodos; i++){
-            int dest = rand() % nodos; //nodo destino
-            int w = rand() % 100; //peso 
-            graph[i].push_back({dest, w});
-            graph[dest].push_back({i, w});
+            aux[i] = i;
+        }
+        shuffle(aux.begin(), aux.end(), default_random_engine());
+
+        //pritn para cachar las conecciones
+        /*for(int i=0;i<nodos;i++){
+            cout << aux[i] <<endl;
+        }*/
+        
+        for (int i = 0; i < nodos; i++){
+            int inic = aux[i];
+            int dest = aux[(i+1) % nodos]; //nodo destino1
+            int w1 = rand() % 100; //peso ida 
+            int w2 = rand() % 100; //peso vuelta
+            graph[inic].push_back({dest, w1});
+            graph[dest].push_back({inic, w1});
         }
         auto inicio = chrono::steady_clock::now();
         DijskstraSlow(nodos, graph, 0);
@@ -113,6 +127,7 @@ int main()
         double duracion = chrono::duration_cast<chrono::microseconds>(fin-inicio).count();
         cout <<"Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
     }
+    
 
 
     return 0;
