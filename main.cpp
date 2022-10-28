@@ -60,7 +60,7 @@ int main()
 {
     int n = 5; //cant de nodos
     vector<pair<int, int>> graph[n + 1]; //inic del lista de adj
-    graph[0].push_back({1, 2});
+    graph[0].push_back({1, 2});// el nodo 0 tiene se dirige al nodo 1 con un peso 2
     graph[0].push_back({3, 1});
     graph[1].push_back({0, 2});
     graph[1].push_back({4, 5});
