@@ -57,6 +57,33 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
 
 }
 
+vector<int> DijkstraHeap(int n, vector<pair<int, int>> *graph, int source){
+
+    priority_queue<pair<int,int>,vector<pair<int,int> >,greater<pair<int,int>>> pq;
+    vector<int> distTo(n,INT_MAX);//1-indexed array for calculating shortest paths
+    distTo[source] = 0;
+    pq.push(make_pair(0,source));   // (dist,source)
+    while( !pq.empty() ){
+        int dist = pq.top().first;
+        int prev = pq.top().second;
+        pq.pop();
+        vector<pair<int,int> >::iterator it;
+        for( it = graph[prev].begin() ; it != graph[prev].end() ; it++){
+            int v = it->first;
+            int w = it->second;
+            if( distTo[v] > distTo[prev] + w){
+                distTo[v] = distTo[prev] + w;
+                pq.push(make_pair(distTo[v], v));
+            }
+        }
+    }
+    printSolution(distTo);
+    return distTo;
+}
+
+
+
+
 vector<pair<int, int>> generateGraph(int nodos){ //no me salio :c
     vector<pair<int, int>> graph[nodos + 1];
     for (int i = 0; i < nodos; i++){
@@ -98,6 +125,12 @@ int main()
     auto fin = chrono::steady_clock::now();
     double duracion = chrono::duration_cast<chrono::microseconds>(fin-inicio).count();
     cout <<"Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
+
+    auto inicio2 = chrono::steady_clock::now();
+    DijkstraHeap(ntest1, graphTest1, 0);
+    auto fin2 = chrono::steady_clock::now();
+    double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2-inicio2).count();
+    cout <<"Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
 
     
     while(n--){
