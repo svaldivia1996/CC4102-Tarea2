@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+//#define USE_SOLUTION_PRINT
+
 void printSolution(vector<int> &dist)
 {
     printf("Vertex \t\t Distance from Source\n");
@@ -52,7 +54,11 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
         }
     }
 
+
+    #ifdef USE_SOLUTION_PRINT
     printSolution(dist);
+    #endif 
+    
     return dist;
 
 }
@@ -77,7 +83,9 @@ vector<int> DijkstraHeap(int n, vector<pair<int, int>> *graph, int source){
             }
         }
     }
+    #ifdef USE_SOLUTION_PRINT
     printSolution(distTo);
+    #endif
     return distTo;
 }
 
