@@ -60,9 +60,9 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
 vector<int> DijkstraHeap(int n, vector<pair<int, int>> *graph, int source){
 
     priority_queue<pair<int,int>,vector<pair<int,int> >,greater<pair<int,int>>> pq;
-    vector<int> distTo(n,INT_MAX);//1-indexed array for calculating shortest paths
+    vector<int> distTo(n,INT_MAX);
     distTo[source] = 0;
-    pq.push(make_pair(0,source));   // (dist,source)
+    pq.push(make_pair(0,source));  
     while( !pq.empty() ){
         int dist = pq.top().first;
         int prev = pq.top().second;
@@ -159,6 +159,12 @@ int main()
         auto fin = chrono::steady_clock::now();
         double duracion = chrono::duration_cast<chrono::microseconds>(fin-inicio).count();
         cout <<"Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
+
+        auto inicio2 = chrono::steady_clock::now();
+        DijkstraHeap(nodos, graph, 0);
+        auto fin2 = chrono::steady_clock::now();
+        double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2-inicio2).count();
+        cout <<"Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
     }
     
 
