@@ -62,7 +62,7 @@ vector<int> DijskstraSlow(int n, vector<pair<int, int>> *graph, int source)
     return dist;
 }
 
-vector<int> DijkstraHeap(int n, vector<pair<int, int>> *graph, int source)
+vector<int> DijkstraHeapPQ(int n, vector<pair<int, int>> *graph, int source)
 {
 
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
@@ -208,7 +208,7 @@ int main()
     cout << "Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
 
     auto inicio2 = chrono::steady_clock::now();
-    DijkstraHeap(ntest1, graphTest1, 0);
+    DijkstraHeapPQ(ntest1, graphTest1, 0);
     auto fin2 = chrono::steady_clock::now();
     double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2 - inicio2).count();
     cout << "Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
@@ -223,11 +223,11 @@ int main()
 
     // crear vector de resultados
     vector<int> resultadosNaive{ };
-    vector<int> resultadosHeap{ };
+    vector<int> resultadosHeapPQ{ };
     vector<int> resultadosFibonacci{ };
     int testCompletos{ };
 
-    string header{ "cant_nodos,n_tests,t_naive[μs],t_heap[μs],t_fibonacci[μs]" };
+    string header{ "cant_nodos,n_tests,t_naive[μs],t_heapPQ[μs],t_fibonacci[μs]" };
 
     // guardar resultados en un txt
     string filename{ "time_results.csv" };
@@ -298,10 +298,10 @@ int main()
         cout << "Me demore con el algoritmo con listas de adyacencia: " << duracion << " microsegundos" << endl;
 
         auto inicio2 = chrono::steady_clock::now();
-        DijkstraHeap(nodos, graph, 0);
+        DijkstraHeapPQ(nodos, graph, 0);
         auto fin2 = chrono::steady_clock::now();
         double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2 - inicio2).count();
-        cout << "Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
+        cout << "Me demore con el algoritmo con HeapPQ: " << duracion2 << " microsegundos" << endl;
 
         auto inicio3 = chrono::steady_clock::now();
         DijkstraFibonacci(nodos, graph, 0, n);
@@ -310,7 +310,7 @@ int main()
         cout << "Me demore con el algoritmo con Fibonacci: " << duracion3 << " microsegundos" << endl;
 
         resultadosNaive.push_back(duracion);
-        resultadosHeap.push_back(duracion2);
+        resultadosHeapPQ.push_back(duracion2);
         resultadosFibonacci.push_back(duracion3);
 
         testCompletos++;    
@@ -327,19 +327,19 @@ int main()
 
     // calcular promedios
     double promNaive{ mean(resultadosNaive, testCompletos) };
-    double promHeap{ mean(resultadosHeap, testCompletos) };
+    double promHeapPQ{ mean(resultadosHeapPQ, testCompletos) };
     double promFibonacci{ mean(resultadosFibonacci, testCompletos) };
 
     // calcular desviaciones estándar
 
     double stdevDinamico{ stdev(resultadosNaive, testCompletos) };
-    double stdevCache{ stdev(resultadosHeap, testCompletos) }; 
+    double stdevCache{ stdev(resultadosHeapPQ, testCompletos) }; 
     double stdevFibonacci{ stdev(resultadosFibonacci, testCompletos) };
 
     
     cout <<"\nRESULTADOS FINALES" << "\n\n" << "Número de tests exitosos: " << testCompletos 
     << "\nTiempo[ms] para Algoritmo Naive -\tprom: " << promNaive << " ;\tdevst: " << stdevDinamico
-    << "\nTiempo[ms] para Algoritmo Heap -\tprom: " << promHeap << " ;\tdevst: " << stdevCache 
+    << "\nTiempo[ms] para Algoritmo HeapPQ -\tprom: " << promHeapPQ << " ;\tdevst: " << stdevCache 
     << "\nTiempo[ms] para Algoritmo Fibonacci -\tprom: " << promFibonacci << " ;\tdevst: " << stdevFibonacci << '\n';
 
     
@@ -348,7 +348,7 @@ int main()
     outfile << nodos 
             << ',' << testCompletos 
             << ',' << promNaive 
-            << ',' << promHeap 
+            << ',' << promHeapPQ 
             << ',' << promFibonacci << '\n';
     // cerrar archivo de tests
     outfile.close();
