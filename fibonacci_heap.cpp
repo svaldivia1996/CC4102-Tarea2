@@ -1,447 +1,383 @@
-#include <iostream>
-#include <bits/stdc++.h>
-#include <vector>
+#include "fibonacci_heap.h"
+
+FibonacciHeap::FibonacciHeap()
+{
+    std::cout << "Fibonacci Heap created.\n";
+}
+
+FibonacciHeap::~FibonacciHeap()
+{
+    std::cout << "Fibonacci Heap destroyed.\n";
+}
+
+bool FibonacciHeap::isEmpty()
+{
+    return m_rootList.isEmpty();
+}
 
 /*
-class CyclicDoublyLinkedList
-{
-    NBNode* m_head{ nullptr };
-
-    public:
-    CyclicDoublyLinkedList();
-    ~CyclicDoublyLinkedList();
-
-    NBNode* get_head();
-    NBNode* get_tail();
-
-    bool isEmpty();
-
-    //Insert at back of list.
-    int insertBack(NBNode* newNode);
-
-    //Inserts at front of list. New node takes the head's place
-    int insertFront(NBNode* newNode);
-
-    NBNode* popFront();
-    NBNode* popBack();
-
-    friend std::ostream& operator<<(std::ostream& out, CyclicDoublyLinkedList& list);
-    friend std::ostream& reversePrint(std::ostream& out, CyclicDoublyLinkedList& list);
-
-    friend class FibonacciHeap;
-};
+Puntero a mínima raíz
+Costo O(1)
 */
-
-class NBNode
+NBNode* FibonacciHeap::getMinRoot()
 {
-    NBNode* m_parent{ nullptr };
-    int m_key{ };
-    int m_degree{ };
-    CyclicDoublyLinkedList m_childList{ };
-    NBNode* m_next{ nullptr };
-    NBNode* m_prev{ nullptr };
-
-    bool wasPruned{ false };
-
-public:
-    NBNode(int key, int degree, NBNode* parent, NBNode* child, NBNode* next, NBNode* prev):
-        m_key{ key }, m_degree{ degree }, m_parent{ parent }, m_next{ next }, m_prev{ prev }
-    {
-        m_childList.insertFront(child);
-        std::cout << "NBNode " << m_key << ", " << m_degree << " created.\n";
-    }
-
-    NBNode(int key):
-        NBNode(key, 0, nullptr, nullptr, nullptr, nullptr)
-    {}
-
-    ~NBNode()
-    {
-        std::cout << "NBNode " << m_key << ", " << m_degree << " destroyed.\n";
-    }
-
-    void setParent(NBNode* parent)
-    {
-        m_parent = parent;
-    }
-
-    void setChild(NBNode* child)
-    {
-        if(m_childList.isEmpty())
-        {
-            m_childList.insertFront(child);
-            return;
-        }
-        m_childList.m_head = child;
-    }
-
-    void setNextSibling(NBNode* next)
-    {
-        m_next = next;
-    }
-
-    void setPrevSibling(NBNode* prev)
-    {
-        m_prev = prev;
-    }
-
-    NBNode* getChild()
-    {
-        return m_childList.get_head();
-    }
-
-    CyclicDoublyLinkedList& getChildrenList()
-    {
-        return m_childList;
-    }
-
-    int insertChildFront(NBNode* newChild)
-    {
-        m_childList.insertFront(newChild);
-        incrementDegree();
-        setParent(newChild);
-    }
-
-    NBNode* getNextSibling()
-    {
-        return m_next;
-    }
-
-    NBNode* getPrevSibling()
-    {
-        return m_prev;
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, NBNode& node);
-
-    int getKey()
-    {
-        return m_key;
-    }
-
-    int getDegree()
-    {
-        return m_degree;
-    }
-
-    int incrementDegree()
-    {
-        m_degree +=1;
-        return 0;
-    }
-
-    int decrementDegree()
-    {
-        m_degree -=1;
-        return 0;
-    }
-
-};
-
-std::ostream& operator<<(std::ostream& out, NBNode& node)
-{
-    return out << "( " << node.m_key << ", " << node.m_degree << " )";
+    return m_rootList.get_head();
 }
 
-
-class CyclicDoublyLinkedList
+int FibonacciHeap::getNumNodes()
 {
-    NBNode* m_head{ nullptr };
-
-    public:
-    CyclicDoublyLinkedList()
-    {
-        std::cout << "CyclicDoublyLinkedList created.\n";
-    }
-
-    ~CyclicDoublyLinkedList()
-    {
-        std::cout << "CyclicDoublyLinkedList destroyed.\n";
-    }
-
-    NBNode* get_head()
-    {
-        return m_head;
-    }
-
-    NBNode* get_tail()
-    {
-        return m_head->getPrevSibling();
-    }
-
-    bool isEmpty()
-    {
-        return m_head == nullptr;
-    }
-
-    /*
-    Insert at back of list.
-    */
-    int insertBack(NBNode* newNode)
-    {
-        if(m_head == nullptr)
-        {
-            m_head = newNode;
-            m_head->setPrevSibling(newNode);
-            m_head->setNextSibling(newNode);
-        }
-
-        get_tail()->setNextSibling(newNode);
-        newNode->setPrevSibling(get_tail());
-
-        m_head->setPrevSibling(newNode);
-        newNode->setNextSibling(m_head);
-        return 0;
-    }
-
-    /*
-    Inserts at front of list. New node takes the head's place
-    */
-    int insertFront(NBNode* newNode)
-    {
-        insertBack(newNode);
-        m_head = newNode;
-        return 0;
-    }
-
-    NBNode* popFront()
-    {
-        if(m_head == NULL)
-        {
-            return nullptr;
-        }
-        else
-        {
-            NBNode* popped{ m_head };
-            if (m_head->getNextSibling() == m_head)
-            {
-                m_head = nullptr;
-            }
-            else
-            {
-                m_head->getPrevSibling()->setNextSibling(m_head->getNextSibling());
-                m_head->getNextSibling()->setPrevSibling(m_head->getPrevSibling());
-                m_head = m_head->getNextSibling();
-            }
-            popped->setNextSibling(nullptr);
-            popped->setPrevSibling(nullptr);
-            return popped;            
-        }
-
-    }
-
-    NBNode* popBack()
-    {
-        m_head = m_head->getPrevSibling();
-        return popFront();
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, CyclicDoublyLinkedList& list);
-    friend std::ostream& reversePrint(std::ostream& out, CyclicDoublyLinkedList& list);
-
-    friend class FibonacciHeap;
-    friend class NBNode;
-};
-
-std::ostream& operator<<(std::ostream& out, CyclicDoublyLinkedList& list)
-{
-    out << "{ ";
-    if (!list.isEmpty())
-    {
-        NBNode* temp{ list.get_head() };
-        out << *temp;
-        while(temp->getNextSibling() != list.get_head())
-        {
-            temp = temp->getNextSibling();
-            out << ", " << *temp;
-        } 
-    }
-    out << " }\n";
-    return out;
+    return m_numNodes;
 }
 
-std::ostream& reversePrint(std::ostream& out, CyclicDoublyLinkedList& list)
+/*
+Costo O(1) amortizado
+*/
+int FibonacciHeap::insertNode(NBNode* newNode)
 {
-    out << "{ ";
-    if (!list.isEmpty())
+    if(getMinRoot() == nullptr || newNode->getKey() < getMinRoot()->getKey())
     {
-        NBNode* temp{ list.get_head()->getPrevSibling() };
-        out << *temp;
-        while(temp->getPrevSibling() != list.get_head()->getPrevSibling())
-        {
-            temp = temp->getPrevSibling();
-            out << ", " << *temp;
-        } 
+        m_rootList.insertFront(newNode);
     }
-    out << " }\n";
-    return out;
+    else
+    {
+        m_rootList.insertBack(newNode);
+    }
+    newNode->unmark();
+    m_numNodes += 1;
+    return 0;
 }
 
-
-class FibonacciHeap
+/*
+Concatena root lists, haciendo cambios de punteros
+Coste: O(1)
+*/
+int FibonacciHeap::mergeFibHeap(FibonacciHeap& aFibHeap)
 {
-    CyclicDoublyLinkedList m_rootList{ };
-    int m_numNodes{ };
-
-    public:
-    FibonacciHeap()
+    NBNode* newHead;
+    NBNode* mergedHead;
+    
+    if(aFibHeap.isEmpty())
     {
-        std::cout << "Fibonacci Heap created.\n";
-    }
-
-    ~FibonacciHeap()
-    {
-        std::cout << "Fibonacci Heap destroyed.\n";
-    }
-
-    bool isEmpty()
-    {
-        return m_rootList.isEmpty();
-    }
-
-    /*
-    Puntero a mínima raíz
-    Costo O(1)
-    */
-    NBNode* getMinRoot()
-    {
-        return m_rootList.get_head();
-    }
-
-    int getNumNodes()
-    {
-        return m_numNodes;
-    }
-
-    /*
-    Costo O(1) amortizado
-    */
-    int insertNode(NBNode* newNode)
-    {
-        if(getMinRoot() == nullptr || newNode->getKey() < getMinRoot()->getDegree())
-        {
-            m_rootList.insertFront(newNode);
-        }
-        else
-        {
-            m_rootList.insertBack(newNode);
-        }
-        m_numNodes += 1;
         return 0;
     }
 
-    /*
-    Concatena root lists, haciendo cambios de punteros
-    Coste: O(1)
-    */
-    int mergeFibHeap(FibonacciHeap& aFibHeap)
+    if(isEmpty())
     {
-        NBNode* newHead;
-        NBNode* mergedHead;
-        
-        if(aFibHeap.isEmpty())
-        {
-            return 0;
-        }
-
-        if(isEmpty())
-        {
-            m_rootList.m_head = aFibHeap.m_rootList.m_head;
-            m_numNodes = aFibHeap.m_numNodes;
-            return 0;
-        }
-
-        if(getMinRoot()->getKey() < aFibHeap.getMinRoot()->getKey())
-        {
-            newHead = getMinRoot();
-            mergedHead = aFibHeap.getMinRoot();
-        }
-        else
-        {
-            newHead = aFibHeap.getMinRoot();
-            mergedHead = getMinRoot();
-        }
-        NBNode* mergedTail{ newHead->getPrevSibling() };
-        NBNode* newTail{ mergedHead->getPrevSibling() };
-
-        newHead->setPrevSibling(newTail);
-        mergedTail->setNextSibling(mergedHead);
-
-        mergedHead->setPrevSibling(mergedTail);
-        newTail->setNextSibling(newHead);
-
-        m_rootList.m_head = newHead;
-        m_numNodes += aFibHeap.m_numNodes;
-        
+        m_rootList.m_head = aFibHeap.m_rootList.m_head;
+        m_numNodes = aFibHeap.m_numNodes;
         return 0;
     }
 
-    NBNode* extractMinimum()
+    if(getMinRoot()->getKey() < aFibHeap.getMinRoot()->getKey())
     {
-        NBNode* extracted{ m_rootList.popFront() };
-        if(extracted != nullptr)
-        {
-            FibonacciHeap temp{ };
-            temp.m_rootList.m_head = extracted->getChild();
-            mergeFibHeap(temp);
-
-
-            m_numNodes -= 1;
-        }
+        newHead = getMinRoot();
+        mergedHead = aFibHeap.getMinRoot();
     }
-
-    int consolidate()
+    else
     {
-        int degreeSize{ std::floor(std::log2(m_numNodes)) };
-        std::vector<NBNode*> degreeList(degreeSize, nullptr);
-        NBNode* actual{ m_rootList.get_head() };
-        while(actual->getNextSibling() != m_rootList.get_head())
+        newHead = aFibHeap.getMinRoot();
+        mergedHead = getMinRoot();
+    }
+    NBNode* mergedTail{ newHead->getPrevSibling() };
+    NBNode* newTail{ mergedHead->getPrevSibling() };
+
+    newHead->setPrevSibling(newTail);
+    mergedTail->setNextSibling(mergedHead);
+
+    mergedHead->setPrevSibling(mergedTail);
+    newTail->setNextSibling(newHead);
+
+    m_rootList.m_head = newHead;
+    m_numNodes += aFibHeap.m_numNodes;
+    
+    return 0;
+}
+
+int FibonacciHeap::setMinimum()
+{
+    NBNode* first{ getMinRoot() };
+    NBNode* actual{ first };
+    if(actual != nullptr)
+    {
+        while(actual != first)
         {
-            int degree{ actual->getDegree() };
-            if(degreeList[degree] != nullptr)
+            if(actual->getKey() < getMinRoot()->getKey())
             {
-                NBNode* newTree;
-                if( degreeList[degree]->getKey() < actual->getKey())
-                {
-                    degreeList[degree]->insertChildFront(actual);
-                    newTree = degreeList[degree];
-                }
-                else
-                {
-                    actual->insertChildFront(degreeList[degree]);
-                    newTree = actual;
-                }
-                degreeList[degree+1] = newTree;
-            }
-            else 
-            {
-                degreeList[degree] = actual;
+                m_rootList.m_head = actual;
             }
             actual = actual->getNextSibling();
         }
+        return 0;
     }
+    return 1;
+}
 
-};
-
-int main()
+NBNode* FibonacciHeap::extractMinimum()
 {
-    CyclicDoublyLinkedList c;
-    std::cout <<  c;
-    for(int i{ }; i < 5; i++)
+    NBNode* extracted{ m_rootList.popFront() };
+    if(extracted != nullptr)
     {
-        NBNode* nodePtr{ new NBNode{ i } };
-        c.insertFront(nodePtr);
-        std::cout << c;
-        reversePrint(std::cout, c);
+        if(extracted->hasChildren())
+        {
+            FibonacciHeap temp{ };
+            temp.m_rootList.m_head = extracted->getChild();
+            extracted->getChildrenList().removeParent();
+             
+            mergeFibHeap(temp);
+        }
+
+        m_numNodes -= 1;
+        consolidate();
+        setMinimum();
     }
-    for(int i{ }; i < 5; i++)
+
+    return extracted;
+}
+
+int FibonacciHeap::consolidate()
+{
+    int degreeSize{ static_cast<int>(std::ceil(std::log2(m_numNodes))) };
+    std::vector<NBNode*> degreeList(degreeSize, nullptr);
+    NBNode* actual{ m_rootList.get_head()};
+    NBNode* newTree;
+    int degree;
+    do
     {
-        std::cout << c;
-        reversePrint(std::cout, c);
-        NBNode* poppedPtr{ c.popBack() };
-        delete poppedPtr;
+        degree = actual->getDegree();
+        // actual = m_rootList.popFront();
+        newTree = actual;
+        actual = actual->getNextSibling();
+        while(degree < degreeList.size() && degreeList[degree] != nullptr)
+        {
+            if( degreeList[degree]->getKey() < newTree->getKey())
+            {
+                m_rootList.removeNode(newTree);
+                degreeList[degree]->insertChildFront(newTree);
+                newTree = degreeList[degree];
+            }
+            else
+            {
+                m_rootList.removeNode(degreeList[degree]);
+                newTree->insertChildFront(degreeList[degree]);
+            }
+            degreeList[degree] = nullptr;
+            degree = newTree->getDegree();
+        }
+        // degreeList[degree] is empty
+        degreeList[degree] = newTree;
+    } while (actual != m_rootList.get_head());
+    return 0;
+}
+
+int FibonacciHeap::decreaseKey(NBNode* aNode, int newKey)
+{
+    aNode->setKey(newKey);
+    if(aNode->getParent() != nullptr)
+    {
+        NBNode* parent{ aNode->getParent() };
+        if(aNode->getKey() < parent->getKey())
+        {
+            bool parentMarked; 
+            do
+            {
+                parentMarked = parent->isMarked();
+                aNode->cutFromParent();
+                insertNode(aNode);
+                aNode = parent;
+                parent = parent->getParent();
+            } while(parent != nullptr && parentMarked);    
+        }     
     }
-    std::cout << c;
+    else
+    {
+        m_rootList.removeNode(aNode);
+        insertNode(aNode);
+    }
+    return 0;
+}
+
+int FibonacciHeap::deleteNode(NBNode* removed)
+{
+    int minimumKey{ getMinRoot()->getKey()-1 };
+    decreaseKey(removed, minimumKey);
+    extractMinimum();
+    return 0;
+}
+
+
+#ifdef USE_GRAPHVIZ
+
+/*
+compatibilidad con c++
+
+No implementa c_str() y usa directamente un for loop para copiar el 
+string en su lugar puesto que la firma pide un char *, que es 
+incompatible con el tipo retornado const char *
+*/
+CGRAPH_API Agnode_t *agnode(Agraph_t * g, std::string name, int createflag)
+{
+    size_t largo{ name.size() };
+    char name_c[largo+1];
+    for(size_t i{ }; i < largo; i++)
+    {
+        name_c[i] = name[i];
+    }
+    name_c[largo] = 0;
+    return agnode(g, name_c, createflag);
+}
+
+int FibonacciHeap::drawDescendants(NBNode* parent, Agraph_t* h)
+{
+    CyclicDoublyLinkedList& siblings{ parent->getChildrenList() };
+    NBNode* actual{ siblings.get_head() };
+    if(actual != nullptr)
+    {   
+        std::string parent_name{ std::to_string(parent->getKey()) };
+        Agnode_t *p = agnode(h, parent_name, 1);
+
+        do
+        {
+            std::string child_name{ std::to_string(actual->getKey()) };
+
+            // draw edge for descendants
+            Agnode_t *c = agnode(h, child_name, 1);
+            Agedge_t *e = agedge(h, p, c, 0, 1);
+
+            if(actual->isMarked())
+            {
+                agsafeset(c, "color", "red", "");
+            }
+        
+            drawDescendants(actual, h);
+            actual = actual->getNextSibling();
+        } while(actual != siblings.get_head());
+        
+    }
+    return 0;
+}
+
+int FibonacciHeap::drawHeap(Agraph_t* h)
+{
+    //drawDescendants()
+    NBNode* actual{ m_rootList.get_head() };
+    if(actual == nullptr)
+    {
+        return 1;
+    }
+    else
+    {
+        std::string actual_name{ std::to_string(actual->getKey()) };
+        Agnode_t *a{ agnode(h, actual_name, 1) };
+
+        // green root
+        agsafeset(a, "color", "green", "");
+
+        Agnode_t *n;
+        drawDescendants(actual, h);
+        NBNode* next{ actual->getNextSibling() };
+
+        while(next != m_rootList.get_head())
+        {
+            std::string next_name{ std::to_string(next->getKey()) };
+            n = agnode(h, next_name, 1);
+            Agedge_t *e = agedge(h, a, n, 0, 1);
+            Agedge_t *eRev = agedge(h, n, a, 0, 1);
+
+            if(next->isMarked())
+            {
+                agsafeset(n, "color", "red", "");
+            }
+
+            a = n;
+            actual = next;
+            next = next->getNextSibling();
+
+            drawDescendants(actual, h);
+
+        }
+
+    }
+    
+    return 0;
+}
+
+int FibonacciHeap::dumpHeapToImage(GVC_t* graphContext)
+{
+    // Create a simple digraph
+    Agraph_t *h = agopen("g", Agundirected, 0);
+    drawHeap(h);
+    // Use the directed graph layout engine
+    gvLayout(graphContext, h, "dot");
+
+    char address[sizeof(this)*2+1];
+    snprintf(address, sizeof(this)*2+1, "%p", static_cast<void*>(this));
+
+    std::cout << address << ' ' << strlen(address) << '\n';
+
+    //std::cout << sizeof(this) << '\n';
+    size_t nameLength{ 14+1+ strlen(address) };
+    char dotName[nameLength];
+    char dotName2[nameLength];
+
+    char svgName[nameLength];
+    char svgName2[nameLength];
+
+    FILE *fp;
+    snprintf(dotName, nameLength, "./fibheap_%s.dot", address);
+    snprintf(svgName, nameLength, "./fibheap_%s.svg", address);
+    dotName[nameLength-1] = 0;
+    svgName[nameLength-1] = 0;
+
+    strcpy(dotName2, dotName);
+    strcpy(svgName2, svgName);
+    
+    std::cout << "Opening dot file at " << dotName << '\n';
+    fp = fopen(dotName, "w+");
+
+    // Output in .dot format
+    gvRender(graphContext, h, "dot", fp);
+    std::cout << "Render complete!\n";
+
+    fclose(fp);
+
+    gvFreeLayout(graphContext, h);
+
+    agclose(h);
+
+    // Use neato to get a more balanced graph
+    // see: https://graphviz.org/docs/layouts/neato/
+    //system("neato -Tsvg hello.dot -o temp.svg");
+
+    char dotCommand[13+1+strlen(dotName)+strlen(svgName)] { "dot -Tsvg " };
+    char hypen[] {" > "};
+    char space[] {" "};
+    char rmCommand[3+1+strlen(svgName2)] {"rm "};
+    char rmCommand2[3+1+strlen(dotName2)] {"rm "};
+    
+
+    std::cout << "Dumping dot file to svg file: " << svgName << '\n';
+    //char* fullDotCommand {strcat(dotCommand, strcat(dotName, strcat(hypen, svgName)))};
+    char* fullDotCommand {strcat(strcat(strcat(dotCommand, dotName), hypen), svgName)};
+    system(fullDotCommand);
+
+    std::cout << "Calling command "<< IMVIEWER_COMMAND_NAME << " to view svg file in image viewer\n";
+
+    char imViewerCommand[strlen(IMVIEWER_COMMAND_NAME)+strlen(svgName)+1+1];
+    strcpy(imViewerCommand, IMVIEWER_COMMAND_NAME);
+
+    char* fullImViewerCommand { strcat(strcat(imViewerCommand, space), svgName) };
+    system(fullImViewerCommand);
+    //system(strcat("eog", strcat(" ", dotName)));
+    std::cout << "Deleting temporary files\n";
+    char* fullrmSvgCommand{ strcat(rmCommand, svgName2) };
+    char* fullrmDotCommand{ strcat(rmCommand2, dotName2) };
+    system(fullrmSvgCommand);
+    system(fullrmDotCommand);
+    std::cout << "Done!\n";
+
 
     return 0;
 }
+
+#endif
+
