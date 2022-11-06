@@ -2,12 +2,12 @@
 
 FibonacciHeap::FibonacciHeap()
 {
-    std::cout << "Fibonacci Heap created.\n";
+    //std::cout << "Fibonacci Heap created.\n";
 }
 
 FibonacciHeap::~FibonacciHeap()
 {
-    std::cout << "Fibonacci Heap destroyed.\n";
+    //std::cout << "Fibonacci Heap destroyed.\n";
 }
 
 bool FibonacciHeap::isEmpty()
@@ -64,7 +64,7 @@ int FibonacciHeap::mergeFibHeap(FibonacciHeap& aFibHeap)
     if(isEmpty())
     {
         m_rootList.m_head = aFibHeap.m_rootList.m_head;
-        m_numNodes = aFibHeap.m_numNodes;
+        //m_numNodes = aFibHeap.m_numNodes;
         return 0;
     }
 
@@ -88,7 +88,7 @@ int FibonacciHeap::mergeFibHeap(FibonacciHeap& aFibHeap)
     newTail->setNextSibling(newHead);
 
     m_rootList.m_head = newHead;
-    m_numNodes += aFibHeap.m_numNodes;
+    //m_numNodes += aFibHeap.m_numNodes;
     
     return 0;
 }
@@ -99,14 +99,14 @@ int FibonacciHeap::setMinimum()
     NBNode* actual{ first };
     if(actual != nullptr)
     {
-        while(actual != first)
+        do
         {
             if(actual->getKey() < getMinRoot()->getKey())
             {
                 m_rootList.m_head = actual;
             }
             actual = actual->getNextSibling();
-        }
+        } while(actual != first);
         return 0;
     }
     return 1;
@@ -128,6 +128,8 @@ NBNode* FibonacciHeap::extractMinimum()
 
         m_numNodes -= 1;
         consolidate();
+
+        // más lento pero más seguro
         setMinimum();
     }
 
@@ -136,37 +138,76 @@ NBNode* FibonacciHeap::extractMinimum()
 
 int FibonacciHeap::consolidate()
 {
-    int degreeSize{ static_cast<int>(std::ceil(std::log2(m_numNodes))) };
-    std::vector<NBNode*> degreeList(degreeSize, nullptr);
-    NBNode* actual{ m_rootList.get_head()};
-    NBNode* newTree;
-    int degree;
-    do
+    if(m_rootList.get_head() != nullptr)
     {
-        degree = actual->getDegree();
-        // actual = m_rootList.popFront();
-        newTree = actual;
-        actual = actual->getNextSibling();
-        while(degree < degreeList.size() && degreeList[degree] != nullptr)
+        int degreeSize{ static_cast<int>(std::ceil(std::log2(m_numNodes))) };
+        std::vector<NBNode*> degreeList(degreeSize, nullptr);
+
+        //NBNode* newHead{ m_rootList.get_head() };
+        NBNode* actual{ m_rootList.get_head()};
+        NBNode* newTree;
+        int degree;
+        do
         {
-            if( degreeList[degree]->getKey() < newTree->getKey())
+            degree = actual->getDegree();
+            // actual = m_rootList.popFront();
+            newTree = actual;
+            actual = actual->getNextSibling();
+            while(degree < degreeList.size() && degreeList[degree] != nullptr)
             {
-                m_rootList.removeNode(newTree);
-                degreeList[degree]->insertChildFront(newTree);
-                newTree = degreeList[degree];
+                if( degreeList[degree]->getKey() < newTree->getKey())
+                {
+                    m_rootList.removeNode(newTree);
+                    degreeList[degree]->insertChildFront(newTree);
+                    newTree = degreeList[degree];
+                }
+                else
+                {
+                    if(degreeList[degree] == actual && actual == m_rootList.get_head())
+                    {
+                        actual = m_rootList.get_head()->getNextSibling();
+                    }
+                    m_rootList.removeNode(degreeList[degree]);
+                    newTree->insertChildFront(degreeList[degree]);
+                }
+
+                // muy peligroso, un descendiente puede terminar siendo la cabecera y eliminando a los ancentros
+                // cuando hay dos mínimos iguales
+                /*
+                if(newTree->getKey() < newHead-> getKey())
+                {
+                    newHead = newTree;
+                }
+                */
+                degreeList[degree] = nullptr;
+                degree = newTree->getDegree();
             }
-            else
+            // degreeList[degree] is empty
+            if(degree < degreeList.size())
             {
-                m_rootList.removeNode(degreeList[degree]);
-                newTree->insertChildFront(degreeList[degree]);
+                degreeList[degree] = newTree;
             }
-            degreeList[degree] = nullptr;
-            degree = newTree->getDegree();
+        // embeces, el nodo actual, antes hermano de newTree, pasa a ser su hijo, por lo que queremos
+        // mejor checkear ambas condiciones: que alguno de los dos llegue a la cabecera
+        } while (actual != m_rootList.get_head() && newTree->getNextSibling() != m_rootList.get_head());
+        
+        
+        /*
+        for(int i{ }; i < degreeList.size(); i++)
+        {
+            if(degreeList[i] != nullptr)
+            {
+                if(degreeList[i]->getKey() < newHead->getKey())
+                {
+                    newHead = degreeList[i];
+                }
+            }
         }
-        // degreeList[degree] is empty
-        degreeList[degree] = newTree;
-    } while (actual != m_rootList.get_head());
-    return 0;
+        m_rootList.m_head = newHead;
+        */
+        return 0;
+    }
+    return 1;
 }
 
 int FibonacciHeap::decreaseKey(NBNode* aNode, int newKey)
@@ -182,6 +223,7 @@ int FibonacciHeap::decreaseKey(NBNode* aNode, int newKey)
             {
                 parentMarked = parent->isMarked();
                 aNode->cutFromParent();
+                m_numNodes -=1;
                 insertNode(aNode);
                 aNode = parent;
                 parent = parent->getParent();
@@ -191,6 +233,7 @@ int FibonacciHeap::decreaseKey(NBNode* aNode, int newKey)
     else
     {
         m_rootList.removeNode(aNode);
+        m_numNodes -=1;
         insertNode(aNode);
     }
     return 0;
@@ -232,12 +275,12 @@ int FibonacciHeap::drawDescendants(NBNode* parent, Agraph_t* h)
     NBNode* actual{ siblings.get_head() };
     if(actual != nullptr)
     {   
-        std::string parent_name{ std::to_string(parent->getKey()) };
+        std::string parent_name{ std::to_string(parent->getKey()) + " - " + std::to_string(parent->getValue()) };
         Agnode_t *p = agnode(h, parent_name, 1);
 
         do
         {
-            std::string child_name{ std::to_string(actual->getKey()) };
+            std::string child_name{ std::to_string(actual->getKey()) + " - " + std::to_string(actual->getValue()) };
 
             // draw edge for descendants
             Agnode_t *c = agnode(h, child_name, 1);
@@ -266,7 +309,7 @@ int FibonacciHeap::drawHeap(Agraph_t* h)
     }
     else
     {
-        std::string actual_name{ std::to_string(actual->getKey()) };
+        std::string actual_name{ std::to_string(actual->getKey()) + " - " + std::to_string(actual->getValue())};
         Agnode_t *a{ agnode(h, actual_name, 1) };
 
         // green root
@@ -278,7 +321,7 @@ int FibonacciHeap::drawHeap(Agraph_t* h)
 
         while(next != m_rootList.get_head())
         {
-            std::string next_name{ std::to_string(next->getKey()) };
+            std::string next_name{ std::to_string(next->getKey()) + " - " + std::to_string(next->getValue()) };
             n = agnode(h, next_name, 1);
             Agedge_t *e = agedge(h, a, n, 0, 1);
             Agedge_t *eRev = agedge(h, n, a, 0, 1);

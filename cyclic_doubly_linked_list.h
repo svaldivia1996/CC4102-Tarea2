@@ -44,7 +44,10 @@ class CyclicDoublyLinkedList
 
     int emptyList();
 
-    NBNode* removeParent();
+    /*
+    Returns the number of children affected by this operation
+    */
+    int removeParent();
 
     friend std::ostream& operator<<(std::ostream& out, CyclicDoublyLinkedList& list);
     friend std::ostream& reversePrint(std::ostream& out, CyclicDoublyLinkedList& list);

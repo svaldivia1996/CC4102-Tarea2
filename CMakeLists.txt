@@ -20,6 +20,10 @@ add_library(fibonacci_heap_lib
 add_executable(simple_example test.cpp)
 target_link_libraries(simple_example fibonacci_heap_lib)
 
+# Add executable target with source files listed in SOURCE_FILES variable
+add_executable(main main.cpp)
+target_link_libraries(main fibonacci_heap_lib)
+
 if(USE_GRAPHVIZ)
     message(STATUS "Using graphviz library...")
     if(EXISTS ${GRAPHVIZ_DIR})
@@ -28,6 +32,7 @@ if(USE_GRAPHVIZ)
         add_compile_definitions(IMVIEWER_COMMAND_NAME="${IMVIEWER_COMMAND_NAME}")
         include_directories("/usr/local/include/graphviz")
         target_link_libraries(simple_example gvc cgraph)
+        target_link_libraries(main gvc cgraph)
     else()
         message(WARINING "Couldn't find graphviz library at directory ${GRAPHVIZ_DIR}. Compiling program without graphviz...")
     endif()

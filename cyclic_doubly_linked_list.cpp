@@ -2,12 +2,12 @@
 
 CyclicDoublyLinkedList::CyclicDoublyLinkedList()
 {
-    std::cout << "CyclicDoublyLinkedList created.\n";
+    //std::cout << "CyclicDoublyLinkedList created.\n";
 }
 
 CyclicDoublyLinkedList::~CyclicDoublyLinkedList()
 {
-    std::cout << "CyclicDoublyLinkedList destroyed.\n";
+    //std::cout << "CyclicDoublyLinkedList destroyed.\n";
 }
 
 NBNode* CyclicDoublyLinkedList::get_head()
@@ -118,8 +118,9 @@ int CyclicDoublyLinkedList::emptyList()
     return 0;
 }
 
-NBNode* CyclicDoublyLinkedList::removeParent()
+int CyclicDoublyLinkedList::removeParent()
 {
+    int affected{ };
     NBNode* actual{ get_head()};
     if(actual != nullptr)
     {
@@ -128,15 +129,11 @@ NBNode* CyclicDoublyLinkedList::removeParent()
         {
             actual->setParent(nullptr);
             actual = actual->getNextSibling();
+            affected +1;
         } while(actual != get_head() );
         parent->getChildrenList().emptyList();
-
-        return parent;
     }
-    else
-    {
-        return nullptr;
-    }
+    return affected;
 }
 
 std::ostream& operator<<(std::ostream& out, CyclicDoublyLinkedList& list)

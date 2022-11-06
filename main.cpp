@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#include "fibonacci_heap.h"
+
 //#define USE_SOLUTION_PRINT
 
 void printSolution(vector<int> &dist)
@@ -90,6 +92,68 @@ vector<int> DijkstraHeap(int n, vector<pair<int, int>> *graph, int source)
     return distTo;
 }
 
+vector<int> DijkstraFibonacci(int n, vector<pair<int, int>> *graph, int source, int nTest)
+{
+    FibonacciHeap fib{ };
+    vector<int> distTo(n, INT_MAX);
+    distTo[source] = 0;
+
+    // heapify and initialization
+    std::vector<NBNode*> nodeLst(n, nullptr);
+    for(int i{ }; i < n; i++)
+    {
+        nodeLst[i] = new NBNode(INT_MAX, i);
+    }
+    nodeLst[source]->setKey(0);
+    for(vector<pair<int, int>>::iterator it = graph[source].begin(); it != graph[source].end(); it++)
+    {
+        nodeLst[it->first]->setKey(it->second);
+    }
+    for(int i{ }; i < n; i++)
+    {
+        fib.insertNode(nodeLst[i]);
+    }
+
+    // remove first element and update weight
+    NBNode* highest{ fib.extractMinimum() };
+    int prev{ highest->getValue() };
+    int dist{ highest->getKey() };
+    distTo[prev] = dist;
+
+
+    // popping item of highest priority
+    while(!fib.isEmpty())
+    {
+        vector<pair<int, int>>::iterator it;
+        for (it = graph[prev].begin(); it != graph[prev].end(); it++)
+        {
+            int v = it->first;
+            int w = it->second;
+            if (nodeLst[v]->getKey() > dist + w)
+            {
+                fib.decreaseKey(nodeLst[v], dist + w);
+            }
+        }
+
+        highest = fib.extractMinimum();
+        
+        
+        prev = highest->getValue() ;
+        dist = highest->getKey() ;
+        distTo[prev] = dist;
+    }
+    // delete all newly allocated nodes
+    for(int i{ }; i < n; i++)
+    {
+        delete nodeLst[i];
+    }
+#ifdef USE_SOLUTION_PRINT
+    printSolution(distTo);
+#endif
+    return distTo;
+}
+
+
 // promedio
 double mean(vector<int> &nums, size_t size)
 {
@@ -149,11 +213,18 @@ int main()
     double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2 - inicio2).count();
     cout << "Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
 
+    auto inicio4 = chrono::steady_clock::now();
+    DijkstraFibonacci(ntest1, graphTest1, 0, 0);
+    auto fin4 = chrono::steady_clock::now();
+    double duracion4 = chrono::duration_cast<chrono::microseconds>(fin4 - inicio4).count();
+    cout << "Me demore con el algoritmo con Fibonacci: " << duracion4 << " microsegundos" << endl;
+
 
 
     // crear vector de resultados
     vector<int> resultadosNaive{ };
     vector<int> resultadosHeap{ };
+    vector<int> resultadosFibonacci{ };
     int testCompletos{ };
 
     string header{ "cant_nodos,n_tests,t_naive[μs],t_heap[μs],t_fibonacci[μs]" };
@@ -232,9 +303,15 @@ int main()
         double duracion2 = chrono::duration_cast<chrono::microseconds>(fin2 - inicio2).count();
         cout << "Me demore con el algoritmo con Heap: " << duracion2 << " microsegundos" << endl;
 
+        auto inicio3 = chrono::steady_clock::now();
+        DijkstraFibonacci(nodos, graph, 0, n);
+        auto fin3 = chrono::steady_clock::now();
+        double duracion3 = chrono::duration_cast<chrono::microseconds>(fin3 - inicio3).count();
+        cout << "Me demore con el algoritmo con Fibonacci: " << duracion3 << " microsegundos" << endl;
+
         resultadosNaive.push_back(duracion);
         resultadosHeap.push_back(duracion2);
-        //resultadosBloque.push_back(duracion3);
+        resultadosFibonacci.push_back(duracion3);
 
         testCompletos++;    
         
@@ -251,18 +328,19 @@ int main()
     // calcular promedios
     double promNaive{ mean(resultadosNaive, testCompletos) };
     double promHeap{ mean(resultadosHeap, testCompletos) };
-    //double promBloque{ mean(resultadosBloque, testCompletos) };
+    double promFibonacci{ mean(resultadosFibonacci, testCompletos) };
 
     // calcular desviaciones estándar
 
     double stdevDinamico{ stdev(resultadosNaive, testCompletos) };
     double stdevCache{ stdev(resultadosHeap, testCompletos) }; 
-    //double stdevBloque{ stdev(resultadosBloque, testCompletos) };
+    double stdevFibonacci{ stdev(resultadosFibonacci, testCompletos) };
 
     
     cout <<"\nRESULTADOS FINALES" << "\n\n" << "Número de tests exitosos: " << testCompletos 
     << "\nTiempo[ms] para Algoritmo Naive -\tprom: " << promNaive << " ;\tdevst: " << stdevDinamico
-    << "\nTiempo[ms] para Algoritmo Heap -\tprom: " << promHeap << " ;\tdevst: " << stdevCache << '\n';
+    << "\nTiempo[ms] para Algoritmo Heap -\tprom: " << promHeap << " ;\tdevst: " << stdevCache 
+    << "\nTiempo[ms] para Algoritmo Fibonacci -\tprom: " << promFibonacci << " ;\tdevst: " << stdevFibonacci << '\n';
 
     
     
@@ -270,7 +348,8 @@ int main()
     outfile << nodos 
             << ',' << testCompletos 
             << ',' << promNaive 
-            << ',' << promHeap << '\n';
+            << ',' << promHeap 
+            << ',' << promFibonacci << '\n';
     // cerrar archivo de tests
     outfile.close();
 

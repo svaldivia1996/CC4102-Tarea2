@@ -1,21 +1,25 @@
 #include "nbnode.h"
 
 
-NBNode::NBNode(int key, int degree, NBNode* parent, NBNode* child, NBNode* next, NBNode* prev):
-    m_key{ key }, m_degree{ degree }, m_parent{ parent }, m_next{ next }, m_prev{ prev }
+NBNode::NBNode(int key, int value, int degree, NBNode* parent, NBNode* child, NBNode* next, NBNode* prev):
+    m_key{ key }, m_value{ value }, m_degree{ degree }, m_parent{ parent }, m_next{ next }, m_prev{ prev }
 {
     m_childList =  new CyclicDoublyLinkedList();
     m_childList->insertFront(child);
-    std::cout << "NBNode " << m_key << ", " << m_degree << " created.\n";
+    //std::cout << "NBNode " << m_key << ", " << m_value << " created.\n";
 }
 
 NBNode::NBNode(int key):
-    NBNode(key, 0, nullptr, nullptr, nullptr, nullptr)
+    NBNode(key, 0, 0, nullptr, nullptr, nullptr, nullptr)
+{}
+
+NBNode::NBNode(int key, int value):
+    NBNode(key, value, 0, nullptr, nullptr, nullptr, nullptr)
 {}
 
 NBNode::~NBNode()
 {
-    std::cout << "NBNode " << m_key << ", " << m_degree << " destroyed.\n";
+    //std::cout << "NBNode " << m_key << ", " << m_value << " destroyed.\n";
     delete m_childList;
 }
 
@@ -47,6 +51,11 @@ void NBNode::setPrevSibling(NBNode* prev)
 void NBNode::setKey(int newKey)
 {
     m_key = newKey;
+}
+
+void NBNode::setValue(int newVal)
+{
+    m_value = newVal;
 }
 
 NBNode* NBNode::getChild()
@@ -106,6 +115,11 @@ int NBNode::getKey()
     return m_key;
 }
 
+int NBNode::getValue()
+{
+    return m_value;
+}
+
 int NBNode::getDegree()
 {
     return m_degree;
@@ -136,11 +150,13 @@ bool NBNode::isMarked()
 int NBNode::mark()
 {
     wasPruned = true;
+    return 0;
 }
 
 int NBNode::unmark()
 {
     wasPruned = false;
+    return 0;
 }
 
 std::ostream& operator<<(std::ostream& out, NBNode& node)
