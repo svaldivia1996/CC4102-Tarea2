@@ -38,3 +38,10 @@ if(USE_GRAPHVIZ)
     endif()
 endif()
 
+add_executable(dijkstraHeap "codes2.c")
+
+target_link_libraries(dijkstraHeap PRIVATE m)
+
+target_compile_options(dijkstraHeap PRIVATE -Wall)
+set_property(TARGET dijkstraHeap PROPERTY C_STANDARD 99)
+
